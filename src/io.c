@@ -263,9 +263,32 @@ static bool
 locale_day_first(void)
 {
 	char *d_fmt = nl_langinfo(D_FMT);
+	char *p_year;
+	char *p_mon;
+	char *p_day;
+
 	DPRINTF("%s: d_fmt=|%s|\n", __func__, d_fmt);
-	/* NOTE: BSDs use '%e' in D_FMT while Linux uses '%d' */
-	return (strpbrk(d_fmt, "ed") < strchr(d_fmt, 'm'));
+
+	/*
+	 * BSDs often use '%e' while Linux often uses '%d'.
+	 * Some locales (like modern en_CA on macOS Tahoe)
+	 * use ISO-style %Y-%m-%d.
+	 *
+	 * If the year appears first, prefer day-month textual
+	 * output instead of collapsing into month-day.
+	 */
+
+	p_year = strchr(d_fmt, 'Y');
+	p_mon  = strchr(d_fmt, 'm');
+	p_day  = strpbrk(d_fmt, "ed");
+
+	if (p_mon == NULL || p_day == NULL)
+		return true;
+
+	if (p_year != NULL && p_year < p_mon && p_year < p_day)
+		return true;
+
+	return (p_day < p_mon);
 }
 
 static bool
