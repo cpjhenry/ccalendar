@@ -270,12 +270,14 @@ locale_day_first(void)
 	DPRINTF("%s: d_fmt=|%s|\n", __func__, d_fmt);
 
 	/*
-	 * BSDs often use '%e' while Linux often uses '%d'.
-	 * Some locales (like modern en_CA on macOS Tahoe)
-	 * use ISO-style %Y-%m-%d.
+	 * BSDs often use '%e' while Linux often uses '%d'. Some locales
+	 * (like modern en_CA on macOS Tahoe) use ISO-style %Y-%m-%d.
 	 *
-	 * If the year appears first, prefer day-month textual
-	 * output instead of collapsing into month-day.
+	 * ISO-style locales (%Y-%m-%d) should map to textual day-month
+	 * rather than month-day, otherwise en_CA produces "Mar 15".
+	 *
+	 * If the year appears first, prefer day-month textual output
+	 * instead of collapsing into month-day.
 	 */
 
 	p_year = strchr(d_fmt, 'Y');
